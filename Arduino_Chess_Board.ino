@@ -7,22 +7,24 @@ String squareName[64] = { "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
                           "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
                           "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
                           "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-                          "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1" };
+                          "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+                        };
 
 //set up chess board positions, since squares make the input low, then 0 represent peices
-int chessBoard[8][8] = {{0,0,0,0,0,0,0,0},
-                       {0,0,0,0,0,0,0,0},                
-                       {1,1,1,1,1,1,1,1},
-                       {1,1,1,1,1,1,1,1},
-                       {1,1,1,1,1,1,1,1},
-                       {1,1,1,1,1,1,1,1},                
-                       {0,0,0,0,0,0,0,0},                
-                       {0,0,0,0,0,0,0,0}};
+int chessBoard[8][8] = {{0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  {1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0}
+};
 
 
 void setup() {
   Serial.begin(9600);
- 
+
   pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
   pinMode(4, INPUT_PULLUP);
@@ -39,7 +41,7 @@ void setup() {
   pinMode(15, INPUT_PULLUP);
   pinMode(16, INPUT_PULLUP);
   pinMode(17, INPUT_PULLUP);
-  
+
   pinMode(18, INPUT_PULLUP);
   pinMode(19, INPUT_PULLUP);
   pinMode(20, INPUT_PULLUP);
@@ -93,277 +95,345 @@ void setup() {
 }
 
 
-  /*
-   * Loop though to current array to see if it matches the prevous board state
-   * 
-   * If a square does not match its previous value, it takes the name of the square 
-   * 
-   * Usualy, two squares should change value each move
-   * 
-   * Special Cases:
-   * If a piece is taken, two pieces will be taken off the board before one being placed back
-   * 
-   * When castling, the same thing happens, but two are placed back
-   * 
-   * Pawn Promotion: piece gets placed back on itself. We can assume queen.
-   * 
-   * 
-   * 
-   * 
-   * For the Following code to work, Pin 2 needs to be connected to square A8, Pin 3 to square A7, and so on. 
-   * 
-   */
+/*
+   Loop though to current array to see if it matches the prevous board state
+
+   If a square does not match its previous value, it takes the name of the square
+
+   Usualy, two squares should change value each move
+
+   Special Cases:
+   If a piece is taken, two pieces will be taken off the board before one being placed back
+
+   When castling, the same thing happens, but two are placed back
+
+   Pawn Promotion: piece gets placed back on itself. We can assume queen.
+
+
+
+
+   For the Following code to work, Pin 2 needs to be connected to square A8, Pin 3 to square A7, and so on.
+
+*/
 
 String currMove = "";
 String firstSquare = "";
 int pos = 2;
 
 void loop() {
-  
+
   pos = 2; //start with pin2, as pin 0 and 1 are used for serial communication
-  
-  for(int x=0;x<8;x++){ //Loop through 8 rows
-    for(int y=0;y<8;y++){ // with 8 columns each
-      if(pos<54){
-        if(chessBoard[x][y] != digitalRead(pos)){ //if the square does not match the previous value of the position on the chess board
-          if(currMove == ""){   //if no move is in progress
+
+  for (int x = 0; x < 8; x++) { //Loop through 8 rows
+    for (int y = 0; y < 8; y++) { // with 8 columns each
+      if (pos < 54) {
+        if (chessBoard[x][y] != digitalRead(pos)) { //if the square does not match the previous value of the position on the chess board
+          if (currMove == "") { //if no move is in progress
             firstSquare = squareName[pos - 2]; //store initial square;
             currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
-                                                  //Since pos starts at 2, subtract 2 to get correct square
+            //Since pos starts at 2, subtract 2 to get correct square
             chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
           }
-          else{     //if move is in progress
-            if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-              currMove = currMove + squareName[pos-2]; //append second square to inital string
+          else {    //if move is in progress
+            if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+              currMove = currMove + squareName[pos - 2]; //append second square to inital string
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
               firstSquare = ""; //clear firstSquare string
               Serial.println(currMove); //print move just made to the screen
               currMove = "";   //clear current move
             }
+            else { //if the player does place the piece back on inital square
+              currMove = "";  //reset the move
+              firstSquare = "";
+              chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+            }
           }
-          
         }
+
       }
-      else{ //Since pos cant account for analog pins, they need seperate if statements
-        if(pos == 54){   
-          if(chessBoard[x][y] != digitalRead(A15)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+      else { //Since pos cant account for analog pins, they need seperate if statements
+        if (pos == 54) {
+          if (chessBoard[x][y] != digitalRead(A15)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 55){ 
-          if(chessBoard[x][y] != digitalRead(A14)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 55) {
+          if (chessBoard[x][y] != digitalRead(A14)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 56){
-          if(chessBoard[x][y] != digitalRead(A13)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 56) {
+          if (chessBoard[x][y] != digitalRead(A13)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 57){
-          if(chessBoard[x][y] != digitalRead(A12)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 57) {
+          if (chessBoard[x][y] != digitalRead(A12)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 58){
-        if(chessBoard[x][y] != digitalRead(A11)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 58) {
+          if (chessBoard[x][y] != digitalRead(A11)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 59){
-          if(chessBoard[x][y] != digitalRead(A10)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 59) {
+          if (chessBoard[x][y] != digitalRead(A10)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 60){
-          if(chessBoard[x][y] != digitalRead(A9)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 60) {
+          if (chessBoard[x][y] != digitalRead(A9)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 61){
-          if(chessBoard[x][y] != digitalRead(A8)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 61) {
+          if (chessBoard[x][y] != digitalRead(A8)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 62){
-          if(chessBoard[x][y] != digitalRead(A7)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 62) {
+          if (chessBoard[x][y] != digitalRead(A7)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 63){
-          if(chessBoard[x][y] != digitalRead(A6)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 63) {
+          if (chessBoard[x][y] != digitalRead(A6)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 64){
-          if(chessBoard[x][y] != digitalRead(A5)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 64) {
+          if (chessBoard[x][y] != digitalRead(A5)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
               }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
+              }
             }
           }
         }
-        else if(pos == 65){
-          if(chessBoard[x][y] != digitalRead(A4)){
-            if(currMove == ""){   //if no move is in progress
-              firstSquare = squareName[pos-2]; //store initial square;
-              currMove = "m" + squareName[pos-2]; //add m before the square to signal start of a move
+        else if (pos == 65) {
+          if (chessBoard[x][y] != digitalRead(A4)) {
+            if (currMove == "") { //if no move is in progress
+              firstSquare = squareName[pos - 2]; //store initial square;
+              currMove = "m" + squareName[pos - 2]; //add m before the square to signal start of a move
               chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
             }
-            else{     //if move is in progress
-              if(squareName[pos-2] != firstSquare){  //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos-2]; //append second square to inital string
+            else {    //if move is in progress
+              if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
+                currMove = currMove + squareName[pos - 2]; //append second square to inital string
                 chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
                 firstSquare = ""; //clear firstSquare string
                 Serial.println(currMove); //print move just made to the screen
                 currMove = "";   //clear current move
+              }
+              else { //if the player does place the piece back on inital square
+                currMove = "";  //reset the move
+                firstSquare = "";
+                chessBoard[x][y] = !chessBoard[x][y];   //update the square to original value
               }
             }
           }
         }
       }
       pos += 1; //go to next square
+      //Serial.print(chessBoard[x][y]);
     }
+    //Serial.println("");
+
   }
- 
+  //Serial.println("");
 }
