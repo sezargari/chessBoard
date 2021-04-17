@@ -1,17 +1,19 @@
 
 //Set up chess board names
-String squareName[64] = { "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
-                          "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-                          "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-                          "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-                          "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-                          "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-                          "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-                          "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
-                        };
+String squareName[64] =
+{ "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+  "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+  "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+  "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+  "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+  "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+  "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+  "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+};
 
 //set up chess board positions, since squares make the input low, then 0 represent peices
-int chessBoard[8][8] = {{0, 0, 0, 0, 0, 0, 0, 0},
+int chessBoard[8][8] =
+{ {0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0},
   {1, 1, 1, 1, 1, 1, 1, 1},
   {1, 1, 1, 1, 1, 1, 1, 1},
@@ -149,7 +151,6 @@ void loop() {
             }
           }
         }
-
       }
       else { //Since pos cant account for analog pins, they need seperate if statements
         if (pos == 54) {
@@ -161,11 +162,15 @@ void loop() {
             }
             else {    //if move is in progress
               if (squareName[pos - 2] != firstSquare) { //if the player doesn't place the piece back on inital square
-                currMove = currMove + squareName[pos - 2]; //append second square to inital string
-                chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
-                firstSquare = ""; //clear firstSquare string
-                Serial.println(currMove); //print move just made to the screen
-                currMove = "";   //clear current move
+                if (squareName[pos - 2] == 1) { //if a piece is being taken
+                  //dont store the value of the taken piece
+                } else {
+                  currMove = currMove + squareName[pos - 2]; //append second square to inital string
+                  chessBoard[x][y] = !chessBoard[x][y];   //update the square to new value
+                  firstSquare = ""; //clear firstSquare string
+                  Serial.println(currMove); //print move just made to the screen
+                  currMove = "";   //clear current move
+                }
               }
               else { //if the player does place the piece back on inital square
                 currMove = "";  //reset the move
@@ -430,10 +435,6 @@ void loop() {
         }
       }
       pos += 1; //go to next square
-      //Serial.print(chessBoard[x][y]);
     }
-    //Serial.println("");
-
   }
-  //Serial.println("");
 }
