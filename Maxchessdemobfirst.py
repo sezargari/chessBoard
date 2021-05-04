@@ -129,6 +129,7 @@ def bmove(fmove):
                         maxchess.printBoard()
                         # maxfen = maxchess.getFEN()
                         print ("computer move: " +smove)
+                        
                         return fmove
         return fmove
     # end of section that allows compter to play white
@@ -194,6 +195,8 @@ def bmove(fmove):
                         maxchess.printBoard()
                         # maxfen = maxchess.getFEN()
                         print ("\ncomputer move: " +smove)
+                        if hint == "":
+                            print("\n Computer Wins!")
                         print ("\n\n\n")   
                         #print (compfirstmove+" "+compsecmove) #print computer move
                         
